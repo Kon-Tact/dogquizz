@@ -1,11 +1,282 @@
-:root { --brand: #41B883; --ink: #222; --muted: #667; }
-* { box-sizing: border-box; }
-html, body, #app { height: 100%; margin: 0; }
-body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif; color: var(--ink); }
-a { color: var(--brand); text-decoration: none; }
-.container { max-width: 960px; margin: 0 auto; padding: 24px; }
-.card { border: 1px solid #e6e6e6; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,.04); }
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; background: var(--brand); color: white; border: 0; cursor: pointer; }
-.btn:focus { outline: 3px solid #c9f3e2; outline-offset: 2px; }
-nav { display: flex; gap: 12px; margin-bottom: 16px; }
-.active { text-decoration: underline; }
+/* -------------------- */
+/* Thème & variables    */
+/* -------------------- */
+:root{
+  /* Palette de couleurs accessible partout via var(--nom) */
+  --bg:#0f1220;       /* Couleur de fond globale (page) */
+  --card:#171a2b;     /* Fond des cartes / tableaux */
+  --surface:#111425;  /* Fond des surfaces (inputs, zones) */
+  --ring:#2b2f45;     /* Bordures, séparateurs, "rings" focus */
+  --muted:#8b93a7;    /* Texte secondaire / atténué */
+  --text:#e6e8ef;     /* Couleur de texte principale */
+  --blue:#218bff;     /* Couleur d’accent (boutons primaires) */
+}
+
+/* Applique le thème global */
+body{ 
+  background:var(--bg);  /* Fond sombre de la page */
+  color:var(--text);     /* Texte par défaut clair */
+}
+
+/* Classe utilitaire pour du texte atténué */
+.muted{ 
+  color:var(--muted); 
+}
+
+/* -------------------- */
+/* Barre d’outils       */
+/* -------------------- */
+.toolbar{ 
+    display:grid; 
+    /* 3 colonnes : 
+       - 1ère prend tout l’espace restant (minmax pour éviter le débordement)
+       - 2e et 3e dimensionnées au contenu (ex : boutons à droite) */
+    grid-template-columns: minmax(0,1fr) max-content max-content;; 
+    gap:12px;                 /* Espacement entre colonnes/éléments */
+    align-items:center;       /* Aligne verticalement les éléments au centre */
+}
+
+/* Contexte de recherche (utile pour positionner un dropdown) */
+.search{ 
+  position:relative;  /* Permet aux éléments absolus à l’intérieur (dropdown) 
+                          de se positionner par rapport à ce conteneur */
+  min-width: 0;       /* Important en grid/flex pour que l’input puisse réduire */
+}
+
+/* L’input à l’intérieur de .search occupe toute la largeur disponible */
+.search input{ 
+  width: 100%; 
+}
+
+/* Style générique des champs texte */
+input[type="text"]{ 
+  width:96%;                    /* Laisse une petite marge interne dans la colonne */
+  padding:12px 14px;            /* Zone cliquable confortable */
+  border-radius:12px;           /* Coins arrondis modernes */
+  border:1px solid var(--ring); /* Bordure subtile */
+  background:var(--surface);    /* Fond légèrement différent du body */
+  color:var(--text);            /* Texte clair */
+}
+
+/* -------------------- */
+/* Boutons              */
+/* -------------------- */
+.btn{ 
+  white-space: nowrap;                  /* Évite le retour à la ligne du label */
+  height: 44px;                         /* Hauteur cohérente avec l’input (44px ~ touch target) */
+  background:var(--blue);               /* Fond bleu par défaut */
+  border-color:var(--blue);             /* Bordure assortie (si bordure visible) */
+  color:var(--text);                    /* Texte clair */
+  padding:10px 14px;                    /* Confort de clic */
+  border-radius:12px;                   /* Coins arrondis */
+  cursor:pointer;                       /* Curseur main (clic) */
+  font-weight:600;                      /* Label un peu accentué */
+}
+
+.btn:hover{ 
+  background:#1a6fcc;                  /* Bleu un peu plus foncé au hover */
+}
+
+/* Variante "primary" (même visuel que .btn ici, sert d’API de style) */
+.btn.primary{ 
+  background:var(--blue); 
+  border-color:var(--blue); 
+}
+
+.btn.primary:hover{ 
+  background:#1a6fcc;                  /* Bleu un peu plus foncé au hover */
+}
+
+/* Variante "ghost" : fond transparent, conserve métriques et couleur de texte */
+.btn.ghost{ 
+  background:transparent;
+}
+
+.btn.ghost:hover{ 
+  background:rgba(33,139,255,.1);      /* Légère surbrillance au hover */
+}
+
+/* Responsive : petits écrans (<= 720px) */
+@media (max-width: 720px){
+  .toolbar{
+    grid-template-columns: 1fr; /* Passe de 3 colonnes à une seule colonne */
+  }
+  .btn{ 
+    width: 80%; /* Les boutons occupent toute la largeur (stack vertical) */
+  }
+}
+
+/* Positionnement et style complet du dropdown */
+.dropdown{ 
+  position:absolute;                /* S’ancre par rapport au parent positionné (.search) */
+  top:calc(100% + 6px);             /* Juste sous l’input, avec 6px d’espace */
+  z-index: 10;                      /* S’assure de passer au-dessus du reste (ex : table head) */
+  left:0; 
+  right:0; 
+  margin-top: 4px;
+  max-height: 14rem;
+  overflow-y: auto;               /* Scroll vertical si dépassement */
+  background:#0e1122;             /* Fond sombre du menu */
+  border:1px solid var(--ring);     /* Bordure pour détacher du fond */
+  border-radius:12px;               /* Coins arrondis */
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.4rem 0.75rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+.dropdown-item.active {
+  /* élément sélectionné avec les flèches */
+  background: rgba(59, 130, 246, 0.3);
+}
+
+.mode {
+  color: #3b82f6;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+mark {
+  background: #3b82f680;
+  color: white;
+  border-radius: 3px;
+}
+
+/* Items du menu (utilise des <button> pour l’accessibilité/clavier) */
+.dropdown button{ 
+  display:block; 
+  width:100%; 
+  text-align:left;                 /* Alignement gauche type menu */
+  padding:10px 12px;               /* Zone cliquable confortable */
+  background:transparent; 
+  color:var(--text); 
+  border:0; 
+}
+
+/* État hover des items de menu */
+.dropdown button:hover{ 
+  background:#151836; 
+}
+
+/* -------------------- */
+/* Tableau              */
+/* -------------------- */
+.table-wrap{ 
+  overflow:auto;                    /* Scroll si le tableau dépasse (x/y) */
+  border:1px solid var(--ring);     /* Cadre autour du tableau */
+  border-radius:14px;               /* Coins arrondis du conteneur */
+  margin-top:16px;                  /* Espace au-dessus */
+}
+
+/* Tableau principal */
+table{ 
+  width:100%; 
+  border-collapse:separate;         /* Permet d’utiliser border-spacing sans fusion des bordures */
+  border-spacing:0;                 /* Pas d’espace entre cellules (contrôle fin) */
+  min-width:900px;                  /* Largeur mini pour éviter un tableau trop écrasé */
+  background:var(--card);           /* Fond de la zone tableau */
+}
+
+/* En-tête du tableau */
+thead th{ 
+  position:sticky;                  /* Reste visible en haut au scroll vertical */
+  top:0;                            /* Collé en haut du conteneur défilant */
+  background:#14172a;               /* Fond de l’en-tête (opaque pour recouvrir) */
+  z-index:2;                        /* Au-dessus des cellules (évite recouvrement) */
+  text-align:left;                  /* Alignement du texte */
+  font-size:12px;                   /* Taille réduite pour l’en-tête */
+  color:var(--muted);               /* Couleur atténuée */
+  padding:10px 12px;                /* Respire visuellement */
+  border-bottom:1px solid var(--ring); /* Séparation visuelle avec le body */
+}
+
+/* Cellules du corps */
+tbody td{ 
+  padding:10px 12px; 
+  border-bottom:1px solid var(--ring); /* Lignes horizontales séparatrices */
+}
+
+/* Zébrage des lignes impaires pour la lisibilité */
+tbody tr:nth-child(odd){ 
+  background:#14172a; 
+}
+
+/* Colonne "breed" accentuée (exemple de colonne importante) */
+.breed-col{ 
+  font-weight:600; 
+}
+
+/* -------------------- */
+/* Badges / Pills       */
+/* -------------------- */
+.pill{ 
+  display:inline-flex;        /* Alignement horizontal (icône + label) */
+  gap:6px;                    /* Espace entre contenus internes */
+  padding:6px 10px;           /* Taille compacte lisible */
+  border-radius:999px;        /* Complètement arrondi (look "pill") */
+  font-size:12px;             /* Petite taille standard de badges */
+  border:1px solid transparent; /* Base : pas de bordure visible */
+}
+
+/* Variantes d’état (succès / moyen / échec) 
+   - Utilisent des couleurs semi-transparentes sur fond sombre 
+   - Ajout d’une bordure légèrement plus visible pour le contraste */
+.ok{ 
+  background:rgba(46,160,67,.15);   /* Vert discret */
+  color:#7ee787;                    /* Texte vert vif lisible sur fond sombre */
+  border-color:rgba(46,160,67,.35); /* Liseré vert */
+}
+.mid{ 
+  background:rgba(198,144,38,.12);  /* Jaune discret */
+  color:#ffd580;                    /* Texte jaune doux */
+  border-color:rgba(198,144,38,.35);
+}
+.ko{ 
+  background:rgba(218,54,51,.12);   /* Rouge discret */
+  color:#ffadad;                    /* Texte rouge clair */
+  border-color:rgba(218,54,51,.35);
+}
+
+/* Petite taille de texte utilitaire */
+.small{ 
+  font-size:12px; 
+  color:var(--muted); 
+}
+
+/* -------------------- */
+/* Pied / stats / vide  */
+/* -------------------- */
+.footer{ 
+  margin:16px 0;                   /* Espace vertical */
+  display:flex; 
+  gap:8px;                         /* Espacement entre éléments (stat, boutons…) */
+  flex-wrap:wrap;                  /* Retour à la ligne si manque d’espace */
+  align-items:center;              /* Aligne verticalement */
+}
+
+/* Carte de statistique compacte */
+.stat{ 
+  background:#14172a;              /* Fond légèrement contrasté du body */
+  border:1px solid var(--ring);    /* Contour pour détacher */
+  padding:10px 12px;               /* Rembourrage */
+  border-radius:12px;              /* Coins arrondis */
+}
+
+/* État “vide” (placeholder / no data) */
+.empty{ 
+  text-align:center;                 /* Centre le message */
+  padding:12px;                      /* Rembourrage */
+  border:1px dashed var(--ring);     /* Bordure en pointillés = indicateur d’espace réservé */
+  border-radius:12px; 
+  margin-top:10px;                   /* Espace avec ce qui précède */
+}
